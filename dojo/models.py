@@ -2240,7 +2240,7 @@ class Test_Import_Finding_Action(TimeStampedModel):
         indexes = [
             models.Index(fields=["finding", "action", "test_import"]),
         ]
-        unique_together = (("test_import", "finding"))
+        unique_together = (("test_import", "finding"),)
         ordering = ("test_import", "action", "finding")
 
     def __str__(self):
@@ -2255,43 +2255,65 @@ class Finding(models.Model):
                             verbose_name=_("Date"),
                             help_text=_("The date the flaw was discovered."))
     sla_start_date = models.DateField(
-                            blank=True,
-                            null=True,
-                            verbose_name=_("SLA Start Date"),
-                            help_text=_("(readonly)The date used as start date for SLA calculation. Set by expiring risk acceptances. Empty by default, causing a fallback to 'date'."))
+        blank=True,
+        null=True,
+        verbose_name=_("SLA Start Date"),
+        help_text=_("(readonly)The date used as start date for SLA calculation. Set by expiring risk acceptances. Empty by default, causing a fallback to 'date'.")
+    )
     sla_expiration_date = models.DateField(
-                            blank=True,
-                            null=True,
-                            verbose_name=_("SLA Expiration Date"),
-                            help_text=_("(readonly)The date SLA expires for this finding. Empty by default, causing a fallback to 'date'."))
-    cwe = models.IntegerField(default=0, null=True, blank=True,
-                              verbose_name=_("CWE"),
-                              help_text=_("The CWE number associated with this flaw."))
-    cve = models.CharField(max_length=50,
-                           null=True,
-                           blank=False,
-                           verbose_name=_("Vulnerability Id"),
-                           help_text=_("An id of a vulnerability in a security advisory associated with this finding. Can be a Common Vulnerabilities and Exposures (CVE) or from other sources."))
-    epss_score = models.FloatField(default=None, null=True, blank=True,
-                              verbose_name=_("EPSS Score"),
-                              help_text=_("EPSS score for the CVE. Describes how likely it is the vulnerability will be exploited in the next 30 days."),
-                              validators=[MinValueValidator(0.0), MaxValueValidator(1.0)])
-    epss_percentile = models.FloatField(default=None, null=True, blank=True,
-                              verbose_name=_("EPSS percentile"),
-                              help_text=_("EPSS percentile for the CVE. Describes how many CVEs are scored at or below this one."),
-                              validators=[MinValueValidator(0.0), MaxValueValidator(1.0)])
-    cvssv3_regex = RegexValidator(regex=r"^AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]", message="CVSS must be entered in format: 'AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H'")
-    cvssv3 = models.TextField(validators=[cvssv3_regex],
-                              max_length=117,
-                              null=True,
-                              verbose_name=_("CVSS v3"),
-                              help_text=_("Common Vulnerability Scoring System version 3 (CVSSv3) score associated with this flaw."))
-    cvssv3_score = models.FloatField(null=True,
-                                        blank=True,
-                                        verbose_name=_("CVSSv3 score"),
-                                        help_text=_("Numerical CVSSv3 score for the vulnerability. If the vector is given, the score is updated while saving the finding. The value must be between 0-10."),
-                                        validators=[MinValueValidator(0.0), MaxValueValidator(10.0)])
-
+        blank=True,
+        null=True,
+        verbose_name=_("SLA Expiration Date"),
+        help_text=_("(readonly)The date SLA expires for this finding. Empty by default, causing a fallback to 'date'.")
+    )
+    cwe = models.IntegerField(
+        default=0, null=True, blank=True,
+        verbose_name=_("CWE"),
+        help_text=_("The CWE number associated with this flaw.")
+    )
+    cve = models.CharField(
+        max_length=50,
+        null=True,
+        blank=False,
+        verbose_name=_("Vulnerability Id"),
+        help_text=_("An id of a vulnerability in a security advisory associated with this finding. Can be a Common Vulnerabilities and Exposures (CVE) or from other sources.")
+    )
+    build_id = models.CharField(
+        editable=True, max_length=150,
+        null=True, blank=True,
+        help_text=_("Build ID that was tested, a reimport may update this field."),
+        verbose_name=_("Build ID")
+    )
+    epss_score = models.FloatField(
+        default=None, null=True, blank=True,
+        verbose_name=_("EPSS Score"),
+        help_text=_("EPSS score for the CVE. Describes how likely it is the vulnerability will be exploited in the next 30 days."),
+        validators=[MinValueValidator(0.0), MaxValueValidator(1.0)]
+    )
+    epss_percentile = models.FloatField(
+        default=None, null=True, blank=True,
+        verbose_name=_("EPSS percentile"),
+        help_text=_("EPSS percentile for the CVE. Describes how many CVEs are scored at or below this one."),
+        validators=[MinValueValidator(0.0), MaxValueValidator(1.0)]
+    )
+    cvssv3_regex = RegexValidator(
+        regex=r"^AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]",
+        message="CVSS must be entered in format: 'AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H'"
+    )
+    cvssv3 = models.TextField(
+        validators=[cvssv3_regex],
+        max_length=117,
+        null=True,
+        verbose_name=_("CVSS v3"),
+        help_text=_("Common Vulnerability Scoring System version 3 (CVSSv3) score associated with this flaw.")
+    )
+    cvssv3_score = models.FloatField(
+        null=True,
+        blank=True,
+        verbose_name=_("CVSSv3 score"),
+        help_text=_("Numerical CVSSv3 score for the vulnerability. If the vector is given, the score is updated while saving the finding. The value must be between 0-10."),
+        validators=[MinValueValidator(0.0), MaxValueValidator(10.0)]
+    )
     url = models.TextField(null=True,
                            blank=True,
                            editable=False,
